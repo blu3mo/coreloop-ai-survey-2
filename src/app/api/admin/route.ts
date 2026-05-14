@@ -9,6 +9,7 @@ function checkAuth(req: NextRequest): boolean {
 }
 
 interface AnswerRow {
+  session_id: string;
   question_id: string;
   question_text: string | null;
   likert: string | null;
@@ -39,18 +40,28 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // Fetch all answers
-  const { data: allAnswers, error: answersError } = await supabase
-    .from("answers")
-    .select("*")
-    .order("question_id");
+  // PostgREST silently caps a single select at its max-rows setting. With
+  // .order("question_id") (string sort), q6-q9 sort last and were the first
+  // to get dropped once total answers grew past the cap.
+  const allAnswers: AnswerRow[] = [];
+  const PAGE_SIZE = 1000;
+  for (let from = 0; ; from += PAGE_SIZE) {
+    const { data: page, error: answersError } = await supabase
+      .from("answers")
+      .select("*")
+      .range(from, from + PAGE_SIZE - 1);
 
-  if (answersError) {
-    console.error("Admin answers fetch error:", answersError);
-    return NextResponse.json(
-      { error: "データの取得に失敗しました。" },
-      { status: 500 },
-    );
+    if (answersError) {
+      console.error("Admin answers fetch error:", answersError);
+      return NextResponse.json(
+        { error: "データの取得に失敗しました。" },
+        { status: 500 },
+      );
+    }
+
+    if (!page || page.length === 0) break;
+    allAnswers.push(...(page as AnswerRow[]));
+    if (page.length < PAGE_SIZE) break;
   }
 
   // Group answers by session_id
