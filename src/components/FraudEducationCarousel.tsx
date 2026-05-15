@@ -92,13 +92,9 @@ export default function FraudEducationCarousel() {
             <div className="w-10 h-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
               {slide.icon}
             </div>
-            <Title>
-              {slide.title}
-            </Title>
+            <Title>{slide.title}</Title>
           </div>
-          <Typography>
-            {slide.copy}
-          </Typography>
+          <Typography>{slide.copy}</Typography>
           {slide.image && (
             <img
               src={slide.image}
@@ -106,9 +102,7 @@ export default function FraudEducationCarousel() {
               className="w-full"
             />
           )}
-          <Typography size="small">
-            {slide.body}
-          </Typography>
+          <Typography size="small">{slide.body}</Typography>
         </div>
       ))}
     </div>

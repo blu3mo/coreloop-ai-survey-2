@@ -7,7 +7,6 @@ import {
   SURVEY_QUESTIONS,
 } from "@/lib/survey-data";
 
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

@@ -12,6 +12,7 @@ import {
   LIKERT_OPTIONS,
   SURVEY_QUESTIONS,
 } from "@/lib/survey-data";
+import { ClusterAnalysisTab } from "./ClusterAnalysisTab";
 
 interface AnswerRow {
   question_id: string;
@@ -92,7 +93,7 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "q1-13" | "q14-18" | "responses"
+    "overview" | "q1-13" | "q14-18" | "responses" | "cluster"
   >("overview");
   const [expandedSessions, setExpandedSessions] = useState<Set<string>>(
     new Set(),
@@ -300,13 +301,7 @@ export default function AdminPage() {
   if (!data) return null;
 
   // Sort indicator
-  const SortHeader = ({
-    label,
-    sortId,
-  }: {
-    label: string;
-    sortId: string;
-  }) => (
+  const SortHeader = ({ label, sortId }: { label: string; sortId: string }) => (
     <th
       className="px-2 py-2 text-left font-medium text-text-muted cursor-pointer hover:text-text select-none whitespace-nowrap"
       onClick={() => toggleSort(sortId)}
@@ -381,6 +376,7 @@ export default function AdminPage() {
               ["q1-13", "Q1-Q13 詳細"],
               ["q14-18", "フォローアップ"],
               ["responses", "個別回答"],
+              ["cluster", "クラスター分析"],
             ] as const
           ).map(([key, label]) => (
             <button
@@ -610,10 +606,7 @@ export default function AdminPage() {
                 {/* Legend */}
                 <div className="flex flex-wrap gap-2">
                   {LIKERT_OPTIONS.map((opt) => (
-                    <div
-                      key={opt.value}
-                      className="flex items-center gap-1"
-                    >
+                    <div key={opt.value} className="flex items-center gap-1">
                       <span
                         className={`inline-block w-3 h-3 rounded-sm ${LIKERT_COLORS[opt.value]}`}
                       />
@@ -661,8 +654,7 @@ export default function AdminPage() {
                     const answerMap = getAnswerMap(s.session_id);
                     const followups =
                       data.followupBySession[s.session_id] || [];
-                    const isHighlighted =
-                      highlightedSession === s.session_id;
+                    const isHighlighted = highlightedSession === s.session_id;
                     return (
                       <tr
                         key={s.session_id}
@@ -732,6 +724,8 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+
+        {activeTab === "cluster" && <ClusterAnalysisTab password={password} />}
       </main>
 
       {/* Fixed tooltip */}
